@@ -24,14 +24,7 @@ if [ -z $flag ]
 		return 1
 fi 
 }
-if [ $? -gt 0 ]
-	then 
-		echo -e "\033[31;5m【error】:user【$normalName】is exist \033[0m "
-		exit 0
-	else
-		useradd $normalName
-fi
-echo "123456"|passwd $normalName --stdin
+
 #close selinux
 closeSELinux() {
 sed -i.bak "s#^SELINUX=.*#SELINUX=disabled#g" /etc/selinux/config
@@ -52,11 +45,21 @@ chkconfig |grep "iptables"
 #closeSrartService() ｛
 #	chkconfig|egrep -v "crond|sshd|network|rsyslog|sysstat"|awk '{print "chkconfig",$1,"off"}'|bash
 #｝
-
+synchronizedDate() {
+	ntpdate ntp1.aliyun.com
+}
 
 main() {
 read -p "please input normal username:" normalName
 normalUserAdd $normalName
+if [ $? -gt 0 ]
+	then 
+		echo -e "\033[31;5m【error】:user【$normalName】is exist \033[0m "
+		exit 0
+	else
+		useradd $normalName
+fi
+echo "123456"|passwd $normalName --stdin
 closeSELinux
 closeIptables
 synchronizedDate
